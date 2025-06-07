@@ -1,0 +1,96 @@
+# Compiled Object files
+*.o
+*.obj
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+httpserver
+
+# Build directories (keep structure, ignore contents)
+build/*
+!build/.gitkeep
+bin/
+obj/
+dist/
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+core.*
+vgcore.*
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile.cmake
+
+# Autotools
+Makefile.in
+aclocal.m4
+compile
+config.guess
+config.sub
+configure
+depcomp
+install-sh
+ltmain.sh
+missing
+
+# Package managers
+node_modules/
+.npm
+
+# Testing
+test_results/
+coverage/
+*.gcda
+*.gcno
+*.gcov
+
+# Documentation build
+docs/_build/
+docs/html/
+docs/latex/
+
+# Backup files
+*.bak
+*.backup

@@ -1,3 +1,26 @@
+/**
+ * @file http_handler.c
+ * @brief HTTP Server - HTTP Protocol Handler Implementation
+ * @version 1.0.0
+ * @date 2025-06-07
+ * @author David Dev (@DavidDevGt)
+ * 
+ * @description
+ * Complete HTTP protocol handling implementation with support for HTTP/1.1
+ * keep-alive connections, request parsing, response generation, and secure
+ * file serving with path traversal protection.
+ * 
+ * Features:
+ * - HTTP/1.1 and HTTP/1.0 protocol support
+ * - Keep-alive connection management
+ * - Secure file serving with realpath() protection
+ * - MIME type detection and content serving
+ * - Proper error response handling (400, 404)
+ * - Request counting and connection limits
+ * 
+ * @license MIT License
+ */
+
 #define _GNU_SOURCE  // for dprintf and realpath
 
 #include "http_handler.h"
@@ -207,7 +230,6 @@ void serve_file(int fd, const char *url_path, int keep_alive)
     fstat(file_fd, &st);
     const char *mime = get_mime(resolved_path);
 
-    // headers
     const char *connection_header = keep_alive ? "keep-alive" : "close";
     dprintf(fd,
             "HTTP/1.1 200 OK\r\n"
@@ -218,7 +240,6 @@ void serve_file(int fd, const char *url_path, int keep_alive)
             (size_t)st.st_size, mime, connection_header, 
             KEEP_ALIVE_TIMEOUT, MAX_REQUESTS_PER_CONNECTION);
 
-    // body
     ssize_t r;
     char buf[BUF_SIZE];
     while ((r = read(file_fd, buf, sizeof(buf))) > 0)

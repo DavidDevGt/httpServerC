@@ -1,3 +1,24 @@
+/**
+ * @file event_loop.c
+ * @brief HTTP Server Core - Event Loop Implementation
+ * @version 1.0.0
+ * @date 2025-06-07
+ * @author David Dev (@DavidDevGt)
+ * 
+ * @description
+ * Main event loop implementation using select() for I/O multiplexing.
+ * Manages connection lifecycle, handles new connections, processes client
+ * requests, and performs periodic connection cleanup.
+ * 
+ * Features:
+ * - Select-based I/O multiplexing
+ * - Automatic connection timeout management
+ * - Connection statistics monitoring
+ * - Graceful connection handling
+ * 
+ * @license MIT License
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -58,7 +79,6 @@ void run_server_loop(int listen_fd)
     {
         read_set = master_set;
         
-        // Set timeout for select to enable periodic cleanup
         timeout.tv_sec = 5;
         timeout.tv_usec = 0;
         
@@ -69,10 +89,8 @@ void run_server_loop(int listen_fd)
             exit(1);
         }
         
-        // Cleanup expired connections periodically
         cleanup_expired_connections(&master_set, &max_fd);
         
-        // Print connection statistics every 30 seconds
         time_t current_time = time(NULL);
         if (current_time - last_stats_print >= 30)
         {
@@ -89,12 +107,10 @@ void run_server_loop(int listen_fd)
             
             if (fd == listen_fd)
             {
-                // new client connection
                 handle_new_connection(listen_fd, &master_set, &max_fd);
             }
             else
             {
-                // Handle existing client
                 handle_existing_client(fd, &master_set);
             }
         }

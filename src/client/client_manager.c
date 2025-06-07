@@ -1,3 +1,24 @@
+/**
+ * @file client_manager.c
+ * @brief HTTP Server - Client Connection Management Implementation
+ * @version 1.0.0
+ * @date 2025-06-07
+ * @author David Dev (@DavidDevGt)
+ * 
+ * @description
+ * Implementation of client connection lifecycle management for HTTP keep-alive
+ * connections. Handles connection tracking, timeout management, and connection
+ * pool maintenance for optimal server performance.
+ * 
+ * Features:
+ * - Dynamic connection pool management
+ * - Automatic timeout cleanup
+ * - Request counting and limits
+ * - Real-time connection statistics
+ * 
+ * @license MIT License
+ */
+
 #include "client_manager.h"
 #include <stdio.h>
 #include <string.h>
@@ -5,7 +26,6 @@
 #include <sys/socket.h>
 #include <time.h>
 
-// Global array to track client connections
 client_info_t clients[MAX_CLIENTS];
 int client_count = 0;
 
@@ -32,7 +52,7 @@ void add_client(int fd)
         clients[client_count].fd = fd;
         clients[client_count].last_activity = time(NULL);
         clients[client_count].request_count = 0;
-        clients[client_count].keep_alive = 1; // Default to keep-alive
+        clients[client_count].keep_alive = 1;
         client_count++;
         printf("Added client fd=%d, total clients: %d\n", fd, client_count);
     }
@@ -49,7 +69,6 @@ void remove_client(int fd)
         if (clients[i].fd == fd)
         {
             printf("Removing client fd=%d, requests served: %d\n", fd, clients[i].request_count);
-            // Move last client to this position
             clients[i] = clients[client_count - 1];
             client_count--;
             printf("Total clients now: %d\n", client_count);
@@ -67,7 +86,6 @@ void cleanup_expired_connections(fd_set *master_set, int *max_fd)
     {
         client_info_t *client = &clients[i];
         
-        // Check if connection has expired
         if (current_time - client->last_activity > KEEP_ALIVE_TIMEOUT)
         {
             printf("Closing expired connection fd=%d (inactive for %ld seconds)\n", 
@@ -75,7 +93,6 @@ void cleanup_expired_connections(fd_set *master_set, int *max_fd)
             close(client->fd);
             FD_CLR(client->fd, master_set);
             
-            // Update max_fd if necessary
             if (client->fd == *max_fd)
             {
                 *max_fd = 0;
@@ -86,10 +103,8 @@ void cleanup_expired_connections(fd_set *master_set, int *max_fd)
                 }
             }
             
-            // Remove client from array
             clients[i] = clients[client_count - 1];
             client_count--;
-            // Don't increment i since we moved a client to this position
         }
         else
         {

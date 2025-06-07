@@ -1,3 +1,17 @@
+/**
+ * @file server.c
+ * @brief HTTP Server Core - Server Implementation
+ * @version 1.0.0
+ * @date 2025-06-07
+ * @author David Dev (@DavidDevGt)
+ * 
+ * @description
+ * Core server implementation providing socket management and server lifecycle.
+ * Creates and configures listening sockets with proper error handling.
+ * 
+ * @license MIT License
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
@@ -18,14 +32,13 @@ int create_listen_socket(int port)
     }
 
     int opt = 1;
-    // reuse address
     setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 
     struct sockaddr_in addr =
         {
-            .sin_family = AF_INET,               // IPv4
-            .sin_port = htons(port),             // port
-            .sin_addr.s_addr = htonl(INADDR_ANY) // any address
+            .sin_family = AF_INET,
+            .sin_port = htons(port),
+            .sin_addr.s_addr = htonl(INADDR_ANY)
         };
 
     if (bind(sockfd, (struct sockaddr *)&addr, sizeof(addr)) < 0)
@@ -34,8 +47,6 @@ int create_listen_socket(int port)
         exit(1);
     }
 
-    // listening all for incoming clients
-    // backlog max 10 connections
     if (listen(sockfd, BACKLOG) < 0)
     {
         perror("listen");

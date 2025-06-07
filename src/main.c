@@ -1,3 +1,23 @@
+/**
+ * @file main.c
+ * @brief HTTP Server C - Main Entry Point
+ * @version 1.0.0
+ * @date 2025-06-07
+ * @author David Dev (@DavidDevGt)
+ * 
+ * @description
+ * Main entry point for the HTTP server implementation with keep-alive support.
+ * Initializes the server components and starts the main event loop.
+ * 
+ * Features:
+ * - HTTP/1.1 with keep-alive connections
+ * - Select-based I/O multiplexing
+ * - Concurrent connection handling
+ * - Real-time connection monitoring
+ * 
+ * @license MIT License
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -7,16 +27,9 @@
 
 int main()
 {
-    // Initialize client manager
     init_client_manager();
-    
-    // Create and configure the listening socket
     int listen_fd = create_listen_socket(PORT);
-    
-    // Print server information
     print_server_info();
-    
-    // Run the main server event loop
     run_server_loop(listen_fd);
     
     return 0;

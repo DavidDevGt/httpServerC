@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTTP Server C - API Testing Console</title>
+    
+    <!-- Modern CSS Frameworks -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-orange: #FF6C37;
+            --primary-blue: #1976D2;
+            --dark-bg: #1a1a1a;
+            --card-bg: #2d2d30;
+            --sidebar-bg: #252526;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --success-color: #00C851;
+            --error-color: #ff4444;
+            --border-color: #3e3e42;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+        }
+
+        .main-container {
+            background: var(--dark-bg);
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        .header {
+            background: var(--card-bg);
+            border-bottom: 2px solid var(--border-color);
+            padding: 1.5rem 0;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+        }
+
+        .header h1 {
+            font-weight: 700;
+            color: var(--primary-orange);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header .subtitle {
+            color: var(--text-secondary);
+            font-weight: 400;
+            font-size: 1.1rem;
+            margin-top: 0.5rem;
+        }
+
+        .card-custom {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .card-custom:hover {
+            border-color: var(--primary-orange);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 108, 55, 0.2);
+        }
+
+        .card-header-custom {
+            background: linear-gradient(135deg, var(--primary-orange), #ff8a65);
+            color: white;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-body-custom {
+            padding: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary-blue), #42A5F5);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: scale(1.05);
+        }
+
+        .stat-card h3 {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .stat-card .value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .btn-test {
+            background: linear-gradient(135deg, var(--success-color), #00ff88);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            margin: 0.25rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-test:hover {
+            background: linear-gradient(135deg, #00A342, #00C851);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 200, 81, 0.4);
+            color: white;
+        }
+
+        .btn-clear {
+            background: linear-gradient(135deg, var(--error-color), #ff6b6b);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            margin: 0.25rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-clear:hover {
+            background: linear-gradient(135deg, #cc0000, #ff4444);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 68, 68, 0.4);
+            color: white;
+        }
+
+        .console-output {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: #f0f6fc;
+            min-height: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-top: 1rem;
+            position: relative;
+        }
+
+        .console-output::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .console-output::-webkit-scrollbar-track {
+            background: #161b22;
+        }
+
+        .console-output::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 4px;
+        }
+
+        .console-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .console-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success-color);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-list li i {
+            color: var(--success-color);
+            width: 20px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top: 3px solid var(--primary-orange);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .badge-custom {
+            background: var(--primary-orange);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="header">
+            <div class="container">
+                <h1>
+                    <i class="fas fa-server"></i>
+                    HTTP Server C - API Testing Console
+                </h1>
+                <p class="subtitle">
+                    <span class="status-indicator"></span>
+                    Professional HTTP server with persistent connections and real-time monitoring
+                    <span class="badge-custom ms-2">v1.0</span>
+                </p>
+            </div>
+        </div>
+
+        <div class="container mt-4">
+            <div class="row">
+                <!-- Server Stats -->
+                <div class="col-12">
+                    <div class="card-custom">
+                        <div class="card-header-custom">
+                            <i class="fas fa-chart-line"></i>
+                            Server Statistics
+                        </div>
+                        <div class="card-body-custom">
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <h3>Max Connections</h3>
+                                    <div class="value">100</div>
+                                </div>
+                                <div class="stat-card">
+                                    <h3>Keep-Alive Timeout</h3>
+                                    <div class="value">30s</div>
+                                </div>
+                                <div class="stat-card">
+                                    <h3>Max Req/Connection</h3>
+                                    <div class="value">100</div>
+                                </div>
+                                <div class="stat-card">
+                                    <h3>Server Port</h3>
+                                    <div class="value">6090</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Features -->
+                <div class="col-lg-6">
+                    <div class="card-custom">
+                        <div class="card-header-custom">
+                            <i class="fas fa-cogs"></i>
+                            Keep-Alive Features
+                        </div>
+                        <div class="card-body-custom">
+                            <ul class="feature-list">
+                                <li>
+                                    <i class="fas fa-clock"></i>
+                                    <span><strong>Automatic timeout:</strong> 30 seconds of inactivity</span>
+                                </li>
+                                <li>
+                                    <i class="fas fa-exchange-alt"></i>
+                                    <span><strong>Request limits:</strong> Maximum 100 requests per connection</span>
+                                </li>
+                                <li>
+                                    <i class="fas fa-code-branch"></i>
+                                    <span><strong>HTTP versions:</strong> HTTP/1.0 and HTTP/1.1 support</span>
+                                </li>
+                                <li>
+                                    <i class="fas fa-broom"></i>
+                                    <span><strong>Auto cleanup:</strong> Expired connections closed automatically</span>
+                                </li>
+                                <li>
+                                    <i class="fas fa-chart-area"></i>
+                                    <span><strong>Real-time stats:</strong> Active connection monitoring</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Technical Details -->
+                <div class="col-lg-6">
+                    <div class="card-custom">
+                        <div class="card-header-custom">
+                            <i class="fas fa-microchip"></i>
+                            Technical Architecture
+                        </div>
+                        <div class="card-body-custom">
+                            <ul class="feature-list">
+                                <li>
+                                    <i class="fas fa-sitemap"></i>
+                                    <span><strong>Architecture:</strong> Select-based I/O multiplexing</span>
+                                </li>
+                                <li>
+                                    <i class="fas fa-globe"></i>
+                                    <span><strong>Protocol:</strong> HTTP/1.1 with HTTP/1.0 compatibility</span>
+                                </li>
+                                <li>
+                                    <i class="fas fa-tags"></i>
+                                    <span><strong>Headers:</strong> Connection, Keep-Alive, Content-Type</span>
+                                </li>
+                                <li>
+                                    <i class="fas fa-shield-alt"></i>
+                                    <span><strong>Security:</strong> Path traversal protection with realpath()</span>
+                                </li>
+                                <li>
+                                    <i class="fas fa-file-code"></i>
+                                    <span><strong>MIME Types:</strong> HTML, CSS, JS, PNG, JPG support</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API Testing Console -->
+                <div class="col-12">
+                    <div class="card-custom">
+                        <div class="card-header-custom">
+                            <i class="fas fa-terminal"></i>
+                            API Testing Console
+                        </div>
+                        <div class="card-body-custom">
+                            <div class="console-header">
+                                <div class="console-title">
+                                    <i class="fas fa-play-circle"></i>
+                                    Test Keep-Alive Functionality
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex flex-wrap gap-2 mb-3">
+                                <button class="btn-test" onclick="testKeepAlive()">
+                                    <i class="fas fa-heartbeat"></i>
+                                    Test Keep-Alive
+                                </button>
+                                <button class="btn-test" onclick="testMultipleRequests()">
+                                    <i class="fas fa-rocket"></i>
+                                    Multiple Requests
+                                </button>
+                                <button class="btn-test" onclick="testPerformance()">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    Performance Test
+                                </button>
+                                <button class="btn-test" onclick="testHeaders()">
+                                    <i class="fas fa-list"></i>
+                                    Inspect Headers
+                                </button>
+                                <button class="btn-clear" onclick="clearOutput()">
+                                    <i class="fas fa-trash"></i>
+                                    Clear Console
+                                </button>
+                            </div>
+
+                            <div id="output" class="console-output">
+                                <span style="color: #58a6ff;"># HTTP Server C - Testing Console</span>
+                                <span style="color: #7c3aed;">## Ready to test keep-alive functionality...</span>
+                                <span style="color: #22c55e;">✓ Server running on port 6090</span>
+                                <span style="color: #f59e0b;">⚡ Click any test button to start</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap & Animations -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        let testRunning = false;
+
+        function log(message, type = 'info') {
+            const output = document.getElementById('output');
+            const timestamp = new Date().toLocaleTimeString();
+            let color = '#f0f6fc';
+            let icon = '•';
+            
+            switch(type) {
+                case 'success':
+                    color = '#22c55e';
+                    icon = '✓';
+                    break;
+                case 'error':
+                    color = '#ef4444';
+                    icon = '✗';
+                    break;
+                case 'warning':
+                    color = '#f59e0b';
+                    icon = '⚠';
+                    break;
+                case 'info':
+                    color = '#58a6ff';
+                    icon = 'ℹ';
+                    break;
+                case 'request':
+                    color = '#a855f7';
+                    icon = '→';
+                    break;
+                case 'response':
+                    color = '#06b6d4';
+                    icon = '←';
+                    break;
+            }
+            
+            output.innerHTML += `<span style="color: #6b7280;">[${timestamp}]</span> <span style="color: ${color};">${icon} ${message}</span>\n`;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function formatHeaders(headers) {
+            let formatted = '';
+            for (let [key, value] of Object.entries(headers)) {
+                formatted += `    ${key}: ${value}\n`;
+            }
+            return formatted;
+        }
+
+        async function testKeepAlive() {
+            if (testRunning) return;
+            testRunning = true;
+            
+            log('=== KEEP-ALIVE CONNECTION TEST ===', 'info');
+            log('Testing persistent connection functionality...', 'info');
+            
+            try {
+                const start = performance.now();
+                log('→ GET / HTTP/1.1', 'request');
+                
+                const response = await fetch('/', {
+                    method: 'GET',
+                    headers: {
+                        'Connection': 'keep-alive'
+                    }
+                });
+                
+                const end = performance.now();
+                const headers = {};
+                for (let [key, value] of response.headers.entries()) {
+                    headers[key] = value;
+                }
+                
+                log(`← ${response.status} ${response.statusText} (${Math.round(end - start)}ms)`, 'response');
+                log('Response Headers:', 'info');
+                log(formatHeaders(headers));
+                
+                if (headers.connection && headers.connection.toLowerCase().includes('keep-alive')) {
+                    log('✓ Keep-Alive connection established successfully!', 'success');
+                } else {
+                    log('⚠ Connection header not indicating keep-alive', 'warning');
+                }
+                
+                if (headers['keep-alive']) {
+                    log(`✓ Keep-Alive parameters: ${headers['keep-alive']}`, 'success');
+                }
+                
+            } catch (error) {
+                log(`✗ Connection failed: ${error.message}`, 'error');
+            }
+            
+            testRunning = false;
+        }
+
+        async function testMultipleRequests() {
+            if (testRunning) return;
+            testRunning = true;
+            
+            log('=== MULTIPLE REQUESTS TEST ===', 'info');
+            log('Testing connection reuse with multiple sequential requests...', 'info');
+            
+            const requests = 5;
+            const start = performance.now();
+            let successCount = 0;
+            
+            for (let i = 1; i <= requests; i++) {
+                try {
+                    log(`→ Request ${i}/5`, 'request');
+                    const reqStart = performance.now();
+                    
+                    const response = await fetch('/', {
+                        method: 'GET',
+                        headers: {
+                            'Connection': 'keep-alive'
+                        }
+                    });
+                    
+                    const reqTime = performance.now() - reqStart;
+                    
+                    if (response.ok) {
+                        log(`← ${response.status} (${Math.round(reqTime)}ms)`, 'response');
+                        successCount++;
+                    } else {
+                        log(`← ${response.status} ${response.statusText}`, 'error');
+                    }
+                    
+                    // Small delay between requests
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    
+                } catch (error) {
+                    log(`✗ Request ${i} failed: ${error.message}`, 'error');
+                }
+            }
+            
+            const totalTime = performance.now() - start;
+            log(`\n📊 Test Results:`, 'info');
+            log(`   • Successful requests: ${successCount}/${requests}`, 'success');
+            log(`   • Total time: ${Math.round(totalTime)}ms`, 'info');
+            log(`   • Average per request: ${Math.round(totalTime/requests)}ms`, 'info');
+            log(`   • Success rate: ${Math.round((successCount/requests)*100)}%`, successCount === requests ? 'success' : 'warning');
+            
+            testRunning = false;
+        }
+
+        async function testPerformance() {
+            if (testRunning) return;
+            testRunning = true;
+            
+            log('=== PERFORMANCE BENCHMARK ===', 'info');
+            log('Running performance test with concurrent requests...', 'info');
+            
+            const concurrentRequests = 10;
+            const start = performance.now();
+            
+            try {
+                const promises = Array.from({length: concurrentRequests}, (_, i) => 
+                    fetch('/', {
+                        method: 'GET',
+                        headers: {
+                            'Connection': 'keep-alive',
+                            'X-Request-ID': `test-${i+1}`
+                        }
+                    }).then(response => ({
+                        id: i + 1,
+                        status: response.status,
+                        ok: response.ok,
+                        time: performance.now()
+                    })).catch(error => ({
+                        id: i + 1,
+                        error: error.message,
+                        time: performance.now()
+                    }))
+                );
+                
+                log(`→ Launching ${concurrentRequests} concurrent requests...`, 'request');
+                const results = await Promise.all(promises);
+                const totalTime = performance.now() - start;
+                
+                const successful = results.filter(r => r.ok).length;
+                const failed = results.filter(r => r.error).length;
+                
+                log(`← All requests completed in ${Math.round(totalTime)}ms`, 'response');
+                log(`\n📊 Performance Results:`, 'info');
+                log(`   • Concurrent requests: ${concurrentRequests}`, 'info');
+                log(`   • Successful: ${successful}`, 'success');
+                log(`   • Failed: ${failed}`, failed > 0 ? 'error' : 'success');
+                log(`   • Total time: ${Math.round(totalTime)}ms`, 'info');
+                log(`   • Requests/second: ${Math.round((concurrentRequests / totalTime) * 1000)}`, 'info');
+                log(`   • Average latency: ${Math.round(totalTime / concurrentRequests)}ms`, 'info');
+                
+            } catch (error) {
+                log(`✗ Performance test failed: ${error.message}`, 'error');
+            }
+            
+            testRunning = false;
+        }
+
+        async function testHeaders() {
+            if (testRunning) return;
+            testRunning = true;
+            
+            log('=== HEADER INSPECTION TEST ===', 'info');
+            log('Inspecting all response headers in detail...', 'info');
+            
+            try {
+                log('→ GET / HTTP/1.1 (detailed headers)', 'request');
+                
+                const response = await fetch('/', {
+                    method: 'GET',
+                    headers: {
+                        'User-Agent': 'HTTP-Server-C-Tester/1.0',
+                        'Accept': 'text/html,application/xhtml+xml',
+                        'Connection': 'keep-alive',
+                        'Cache-Control': 'no-cache'
+                    }
+                });
+                
+                log(`← ${response.status} ${response.statusText}`, 'response');
+                log('\n📋 Complete Response Headers:', 'info');
+                
+                const headers = {};
+                for (let [key, value] of response.headers.entries()) {
+                    headers[key] = value;
+                    log(`   ${key}: ${value}`, 'info');
+                }
+                
+                log('\n🔍 Header Analysis:', 'info');
+                
+                // Analyze specific headers
+                if (headers['content-type']) {
+                    log(`✓ Content-Type: ${headers['content-type']}`, 'success');
+                }
+                
+                if (headers['content-length']) {
+                    log(`✓ Content-Length: ${headers['content-length']} bytes`, 'success');
+                }
+                
+                if (headers['connection']) {
+                    const isKeepAlive = headers['connection'].toLowerCase().includes('keep-alive');
+                    log(`${isKeepAlive ? '✓' : '⚠'} Connection: ${headers['connection']}`, isKeepAlive ? 'success' : 'warning');
+                }
+                
+                if (headers['server']) {
+                    log(`✓ Server: ${headers['server']}`, 'success');
+                } else {
+                    log(`⚠ No Server header present`, 'warning');
+                }
+                
+                if (headers['date']) {
+                    log(`✓ Date: ${headers['date']}`, 'success');
+                }
+                
+            } catch (error) {
+                log(`✗ Header inspection failed: ${error.message}`, 'error');
+            }
+            
+            testRunning = false;
+        }
+
+        function clearOutput() {
+            const output = document.getElementById('output');
+            output.innerHTML = `<span style="color: #58a6ff;"># HTTP Server C - Testing Console</span>
+<span style="color: #7c3aed;">## Console cleared - Ready for new tests</span>
+<span style="color: #22c55e;">✓ Server running on port 6090</span>
+<span style="color: #f59e0b;">⚡ Click any test button to start</span>`;
+        }
+
+        // Auto-run initial test on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                log('🚀 Auto-running initial keep-alive test...', 'info');
+                testKeepAlive();
+            }, 1500);
+        });
+
+        // Add some visual feedback for running tests
+        function setButtonState(running) {
+            const buttons = document.querySelectorAll('.btn-test');
+            buttons.forEach(btn => {
+                if (running) {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.6';
+                } else {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                }
+            });
+        }
+
+        // Update the test functions to show loading state
+        const originalTestRunning = testRunning;
+        Object.defineProperty(window, 'testRunning', {
+            get: () => originalTestRunning,
+            set: (value) => {
+                originalTestRunning = value;
+                setButtonState(value);
+            }
+        });
+    </script>
+</body>
+</html>
